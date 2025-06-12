@@ -13,12 +13,22 @@ const initialValue = {
 }
 
 export function useKeyboard() {
-	const [shown, setShown] = useState(false)
-	const [coordinates, setCoordinates] = useState<{
-		start: undefined | KeyboardMetrics
-		end: KeyboardMetrics
-	}>(initialValue)
-	const [keyboardHeight, setKeyboardHeight] = useState<number>(0)
+        const initialMetrics = typeof Keyboard.metrics === "function" ? Keyboard.metrics() : undefined
+        const [shown, setShown] = useState(() => {
+                if (typeof Keyboard.isVisible === "function") {
+                        try {
+                                return Keyboard.isVisible()
+                        } catch {
+                                return false
+                        }
+                }
+                return false
+        })
+        const [coordinates, setCoordinates] = useState<{
+                start: undefined | KeyboardMetrics
+                end: KeyboardMetrics
+        }>(() => (initialMetrics ? { start: undefined, end: initialMetrics } : initialValue))
+        const [keyboardHeight, setKeyboardHeight] = useState<number>(() => initialMetrics?.height ?? 0)
 
 	const handleKeyboardWillShow: KeyboardEventListener = (e) => {
 		setCoordinates({ start: e.startCoordinates, end: e.endCoordinates })

@@ -22,6 +22,8 @@ jest.mock("react-native", () => {
 		},
                 Keyboard: (() => {
                         const listeners = new Map()
+                        let visible = false
+                        let metrics
                         return {
                                 addListener: jest.fn((event, cb) => {
                                         listeners.set(event, cb)
@@ -32,7 +34,17 @@ jest.mock("react-native", () => {
                                 emit: jest.fn((event, data) => {
                                         const cb = listeners.get(event)
                                         if (cb) cb(data)
+                                        if (event === "keyboardDidShow") {
+                                                visible = true
+                                                metrics = data?.endCoordinates
+                                        }
+                                        if (event === "keyboardDidHide") {
+                                                visible = false
+                                                metrics = undefined
+                                        }
                                 }),
+                                isVisible: jest.fn(() => visible),
+                                metrics: jest.fn(() => metrics),
                         }
                 })(),
 		AccessibilityInfo: {
