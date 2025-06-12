@@ -3,16 +3,22 @@ import { act, renderHook } from "@testing-library/react-hooks/native"
 import { Keyboard } from "react-native"
 
 describe("useKeyboard", () => {
-	const mockCoords = { screenX: 0, screenY: 0, width: 0, height: 0 }
-	const emitKeyboardEvent = ({
-		show = true,
-		startCoordinates = mockCoords,
-		endCoordinates = mockCoords,
-	}) => {
-		const mockEvent = { startCoordinates, endCoordinates }
+        const mockCoords = { screenX: 0, screenY: 0, width: 0, height: 0 }
+        const emitKeyboardEvent = ({
+                show = true,
+                startCoordinates = mockCoords,
+                endCoordinates = mockCoords,
+        }) => {
+                const mockEvent = { startCoordinates, endCoordinates }
 
-		Keyboard.emit(show ? "keyboardDidShow" : "keyboardDidHide", show ? mockEvent : null)
-	}
+                Keyboard.emit(show ? "keyboardDidShow" : "keyboardDidHide", show ? mockEvent : null)
+        }
+
+        afterEach(() => {
+                act(() => {
+                        emitKeyboardEvent({ show: false })
+                })
+        })
 
 	describe("setKeyboardHeight: number", () => {
 		it("keyboard height is zero by default", () => {
@@ -50,12 +56,24 @@ describe("useKeyboard", () => {
 		})
 	})
 
-	describe("keyboardShown: boolean", () => {
-		it("keyboard closed by default", () => {
-			const { result } = renderHook(() => useKeyboard())
+        describe("keyboardShown: boolean", () => {
+                it("keyboard closed by default", () => {
+                        const { result } = renderHook(() => useKeyboard())
 
-			expect(result.current.keyboardShown).toBe(false)
-		})
+                        expect(result.current.keyboardShown).toBe(false)
+                })
+
+                it("should detect already opened keyboard on mount", () => {
+                        const height = 100
+                        act(() => {
+                                emitKeyboardEvent({ show: true, endCoordinates: { ...mockCoords, height } })
+                        })
+
+                        const { result } = renderHook(() => useKeyboard())
+
+                        expect(result.current.keyboardShown).toBe(true)
+                        expect(result.current.keyboardHeight).toBe(height)
+                })
 
 		it("should set keyboardShown when keyboard will open", () => {
 			const { result } = renderHook(() => useKeyboard())
