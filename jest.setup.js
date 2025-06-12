@@ -1,11 +1,4 @@
-import { jest } from "@jest/globals"
-
-jest.mock("react-native/Libraries/Utilities/Platform", () => ({
-	select: jest.fn((platform) => platform.default),
-}))
-
 jest.mock("react-native", () => {
-	const RN = jest.requireActual("react-native/Libraries/ReactNative/oss/ReactNativeRenderer-prod")
 
 	return {
 		Platform: {
@@ -27,12 +20,21 @@ jest.mock("react-native", () => {
 				remove: jest.fn(),
 			})),
 		},
-		Keyboard: {
-			addListener: jest.fn(() => ({
-				remove: jest.fn(),
-			})),
-			emit: jest.fn(),
-		},
+                Keyboard: (() => {
+                        const listeners = new Map()
+                        return {
+                                addListener: jest.fn((event, cb) => {
+                                        listeners.set(event, cb)
+                                        return {
+                                                remove: jest.fn(() => listeners.delete(event)),
+                                        }
+                                }),
+                                emit: jest.fn((event, data) => {
+                                        const cb = listeners.get(event)
+                                        if (cb) cb(data)
+                                }),
+                        }
+                })(),
 		AccessibilityInfo: {
 			addEventListener: jest.fn(() => ({
 				remove: jest.fn(),

@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react-hooks"
+import { act, renderHook } from "@testing-library/react-hooks/native"
 import { AppState, AppStateStatus } from "react-native"
 import { useAppState } from "./useAppState"
 

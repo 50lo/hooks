@@ -1,5 +1,5 @@
 import { useInteractionManager } from "./useInteractionManager"
-import { act, renderHook } from "@testing-library/react-hooks"
+import { act, renderHook } from "@testing-library/react-hooks/native"
 import { InteractionManager } from "react-native"
 
 jest.mock("react-native", () => ({
